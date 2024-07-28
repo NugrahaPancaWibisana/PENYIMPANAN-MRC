@@ -4,16 +4,10 @@ import { cookies } from "next/headers";
 import Database from "./db";
 import { v4 as uuid } from "uuid";
 import { redirect } from "next/navigation";
+import { Barang } from "@/components/Columns";
 
 export async function handleLogin(formData: FormData) {
   const tokenSession = uuid();
-
-  cookies().set("token", tokenSession, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 60 * 60 * 24 * 7,
-    path: "/",
-  });
 
   const user = await Database.user.update({
     where: {
@@ -24,6 +18,26 @@ export async function handleLogin(formData: FormData) {
     },
   });
 
+  cookies().set("name", user.name!, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+  });
+
+  cookies().set("token", user.token!, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+  });
+
+  if (user.role === "admin") {
+    cookies().set("admin", "true", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+    });
+  }
+
   if (user.role === "admin") {
     redirect("/admin/dashboard");
   } else {
@@ -31,13 +45,41 @@ export async function handleLogin(formData: FormData) {
   }
 }
 
-export async function getSession() {
-  const tokenSession = cookies().get("token")?.value;
-  return tokenSession
-    ? await Database.user.findFirst({
-        where: {
-          token: tokenSession,
-        },
-      })
-    : null;
+export async function getBarang(): Promise<Barang[]> {
+  const barang = await Database.barang.findMany();
+  return barang;
+}
+
+export async function deleteBarang(id: number) {
+  try {
+      await Database.barang.delete({
+          where: {
+              id: id
+          }
+      });
+  } catch (error) {
+      console.error(`Gagal menghapus barang dengan ID ${id} ${error}`);
+  }
+}
+
+
+export async function handleLogout() {
+  cookies().delete("token");
+  await Database.user.update({
+    where: {
+      name: cookies().get("name")?.value,
+    },
+    data: {
+      token: null,
+    },
+  });
+
+  cookies().delete("name");
+  cookies().delete("token");
+
+  if (cookies().get("admin")) {
+    cookies().delete("admin");
+  }
+
+  redirect("/");
 }
