@@ -3,7 +3,6 @@ import Clock from '@/components/Clock';
 import DataTable from '@/components/DataTable';
 import Header from '@/components/Header';
 import CardGroup from '@/components/CardGroup';
-import { Toaster } from '@/components/ui/toaster';
 
 export default function Dashboard() {
     return (

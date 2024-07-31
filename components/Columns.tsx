@@ -2,7 +2,16 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "./ui/button";
 import { ArrowUpDown } from "lucide-react"
-
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,6 +24,9 @@ import {
   AlertDialogTrigger,
 } from "./ui/alert-dialog"
 import Toast from "./Toast";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { updateStokBarang } from "@/lib/actions";
 
 
 export type Barang = {
@@ -27,7 +39,7 @@ export type Barang = {
 export const Columns: ColumnDef<Barang>[] = [
   {
     header: "ID",
-    cell: ({row}) => {
+    cell: ({ row }) => {
       return row.index + 1
     }
   },
@@ -71,13 +83,39 @@ export const Columns: ColumnDef<Barang>[] = [
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Batalkan</AlertDialogCancel>
-                <AlertDialogAction>
+                <AlertDialogAction className="bg-indigo-50 text-blue-600 p-2 rounded-lg text-center hover:bg-white hover:text-black duration-500 border">
                   <Toast id={row.original.id!} />
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-          <Button className="bg-amber-50 text-yellow-600 p-2 rounded-lg w-full text-center hover:bg-white hover:text-black duration-500 border">Edit</Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="bg-amber-50 text-yellow-600 p-2 rounded-lg w-full text-center hover:bg-white hover:text-black duration-500 border">Edit Stok</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <form action={updateStokBarang}>
+                <DialogHeader>
+                  <DialogTitle>Edit Stok barang</DialogTitle>
+                  <DialogDescription>
+                    Lakukan perubahan pada stok barang Anda di sini. Klik simpan setelah selesai.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="stokBarang" className="text-right">
+                      Stok
+                    </Label>
+                    <Input className="hidden" id="id" name="id" value={row.original.id!} hidden />
+                    <Input autoFocus id="stokBarang" name="stokBarang" type="number" placeholder={row.original.stokBarang!.toString()} className="col-span-3" />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <DialogClose><Button type="submit">Save changes</Button></DialogClose>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       )
     }

@@ -50,18 +50,32 @@ export async function getBarang(): Promise<Barang[]> {
   return barang;
 }
 
-export async function deleteBarang(id: number) {
+export async function updateStokBarang(formData: FormData) {
   try {
-      await Database.barang.delete({
-          where: {
-              id: id
-          }
-      });
+    await Database.barang.update({
+      where: {
+        id: Number(formData.get("id")),
+      },
+      data: {
+        stokBarang: Number(formData.get("stokBarang")),
+      },
+    });
   } catch (error) {
-      console.error(`Gagal menghapus barang dengan ID ${id} ${error}`);
+    console.error(`Gagal mengupdate stok barang ${error}`);
   }
 }
 
+export async function deleteBarang(id: number) {
+  try {
+    await Database.barang.delete({
+      where: {
+        id: id,
+      },
+    });
+  } catch (error) {
+    console.error(`Gagal menghapus barang dengan ID ${id} ${error}`);
+  }
+}
 
 export async function handleLogout() {
   cookies().delete("token");
